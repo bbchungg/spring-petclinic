@@ -1,5 +1,5 @@
-# Use a lightweight JDK or JRE image
-FROM openjdk:17-jdk-slim
+# Use JFrog Artifactory as the source for the base image
+FROM soleng.jfrog.io/brianchu-docker-virtual/openjdk:17-jdk-slim
 
 # Set working directory
 WORKDIR /app
