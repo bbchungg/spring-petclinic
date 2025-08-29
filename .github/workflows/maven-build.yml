@@ -44,6 +44,8 @@ jobs:
         with:
           java-version: ${{matrix.java}}
           distribution: 'adopt'
+      - name: Show Maven effective settings
+        run: ./mvnw help:effective-settings
       - name: Build with Maven Wrapper
         run: ./mvnw -B verify
       - name: Log in to JFrog Docker
