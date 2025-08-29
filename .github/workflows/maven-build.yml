@@ -43,9 +43,8 @@ jobs:
             --interactive=false
 
       - name: Build with Maven via JFrog CLI
-        run: jf mvn clean verify -B \
-             --build-name=spring-petclinic \
-             --build-number=${{ github.run_number }}
+        run: jf mvn clean verify -B --build-name=spring-petclinic --build-number=${{ github.run_number }}
+
 
       # - name: Build with Maven Wrapper
       #   run: ./mvnw -B verify
