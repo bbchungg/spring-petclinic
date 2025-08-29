@@ -16,38 +16,38 @@ jobs:
     strategy:
       matrix:
         java: [ '17' ]
+    env: # define env vars for Maven here
+      ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+      ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
     steps:
       - uses: actions/checkout@v4
-      - name: Configure Maven settings for JFrog
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<EOF
-          <settings>
-            <servers>
-              <server>
-                <id>brianchu-mvn-virtual</id>
-                <username>${{ secrets.ARTIFACTORY_USER }}</username>
-                <password>${{ secrets.ARTIFACTORY_PASS }}</password>
-              </server>
-            </servers>
-            <mirrors>
-              <mirror>
-                <id>artifactory</id>
-                <mirrorOf>*</mirrorOf>
-                <url>https://soleng.jfrog.io/artifactory/brianchu-mvn-virtual</url>
-              </mirror>
-            </mirrors>
-          </settings>
-          EOF
+
       - name: Set up JDK ${{matrix.java}}
         uses: actions/setup-java@v4
         with:
           java-version: ${{matrix.java}}
           distribution: 'adopt'
-      - name: Show Maven effective settings
-        run: ./mvnw help:effective-settings
-      - name: Build with Maven Wrapper
-        run: ./mvnw -B verify
+
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        with:
+          version: latest
+
+      - name: Configure JFrog CLI
+        run: |
+          jf c add soleng \
+            --url=https://soleng.jfrog.io \
+            --user=$ARTIFACTORY_USER \
+            --password=$ARTIFACTORY_PASS \
+            --interactive=false
+
+      - name: Build with Maven via JFrog CLI
+        run: jf mvn -B clean verify
+
+      # - name: Build with Maven Wrapper
+      #   run: ./mvnw -B verify
+
       - name: Log in to JFrog Docker
         run: echo "${{ secrets.ARTIFACTORY_PASS }}" | docker login soleng.jfrog.io -u ${{ secrets.ARTIFACTORY_USER }} --password-stdin
 
@@ -56,3 +56,6 @@ jobs:
 
       - name: Push Docker image
         run: docker push soleng.jfrog.io/brianchu-docker-virtual/spring-petclinic:1.0.${{ github.run_number }}
+
+      - name: Publish build info to Artifactory
+        run: jf rt build-publish
