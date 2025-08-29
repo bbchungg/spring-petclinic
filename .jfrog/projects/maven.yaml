@@ -1,0 +1,11 @@
+version: 1
+type: maven
+resolver:
+    serverId: brianchu
+    snapshotRepo: brianchu-mvn-virtual
+    releaseRepo: brianchu-mvn-virtual
+deployer:
+    serverId: brianchu
+    snapshotRepo: brianchu-mvn-local
+    releaseRepo: brianchu-mvn-local
+useWrapper: true

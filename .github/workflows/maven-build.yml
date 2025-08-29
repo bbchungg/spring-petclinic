@@ -36,14 +36,16 @@ jobs:
 
       - name: Configure JFrog CLI
         run: |
-          jf c add soleng \
+          jf c add brianchu \
             --url=https://soleng.jfrog.io \
             --user=$ARTIFACTORY_USER \
             --password=$ARTIFACTORY_PASS \
             --interactive=false
 
       - name: Build with Maven via JFrog CLI
-        run: jf mvn -B clean verify
+        run: jf mvn clean verify -B \
+             --build-name=spring-petclinic \
+             --build-number=${{ github.run_number }}
 
       # - name: Build with Maven Wrapper
       #   run: ./mvnw -B verify
@@ -58,4 +60,4 @@ jobs:
         run: docker push soleng.jfrog.io/brianchu-docker-virtual/spring-petclinic:1.0.${{ github.run_number }}
 
       - name: Publish build info to Artifactory
-        run: jf rt build-publish
+        run: jf rt build-publish spring-petclinic ${{ github.run_number }}
